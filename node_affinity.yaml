@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deploy
+  namespace: tibco
+  labels:
+    app: httpd-deploy-lbl1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1  
+  template:
+    metadata:
+      labels:
+        app: httpd-app
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - workertwo
+      containers:
+      - name: httpd-container
+        image: httpd:2.4.58
+        ports:
+        - containerPort: 80
+  selector:
+    matchLabels:
+      app: httpd-app
